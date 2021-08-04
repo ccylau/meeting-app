@@ -1,0 +1,110 @@
+<!-- popups have a maximum height of 600px and maximum width of 800px -->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      min-width:200px;
+    }
+    table {
+      border-collapse: collapse;
+    }
+    tr {
+      position: relative;
+    }
+    th, td {
+      /* position: relative; */
+      border: hidden;
+      width: 200px;
+      text-align: center;
+      background: none;
+    }
+    .progress {
+      position: absolute;
+      width: 0%;
+      height: 16px;
+      /* background-color: #4CAF50; */
+      z-index: -1;
+      color: white;
+    }
+    #timer {
+      margin: 5px;
+    }
+    #results {
+      font-size: 14px;
+      /* font-weight: bold; */
+      border: 1px solid #ddd;
+      /* padding: 15px; */
+      text-align: left;
+      min-height: 50px;
+      /* min-width: 200px; */
+    }
+    #speechbutton {
+      margin: 5px;
+    }
+    #list {
+      margin: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h3 style="text-align:center;">Meeting App</h3>
+	<!--<button id="input" >Click</button>-->
+	<!--<input id="input" />  -->
+	
+	<!--<form>
+		<input type="text" id="textInput" name="textInput" size=20>
+		<input type="button" id="button" value="Read this">
+  </form>-->
+  <div id="homePage">
+    <!-- this is when there's no valid agenda on spreadsheet -->
+    <p>Would you like to create a new meeting agenda?</p>
+    <input type="button" id="createAgendaButton" value="Create Meeting Agenda" />
+  </div>
+  <div id="onAgendaSpreadsheetStuff">
+    <table width="100%", id="timeTable">
+      <col style="width:120px">
+      <col style="width:75px">
+      <thead>
+      <tr>
+        <th style="width:200px">Topic</th>
+        <th style="width:80px">Minutes</th>
+      </tr>
+      </thead>
+      <tbody id="tbody" class="table-body">
+      </tbody>
+    </table>
+  
+    <!-- <input type="button" id="clockButton" value="Start Clock" />
+    <input type="button" id="addButton" value="+ 10s" /> -->
+    <div class="buttonGroup" id="timer">
+      <input type="button" id="clockButton" value="Start clock" />
+      <input type="button" id="addButton" value="+" />
+      <input type="button" id="skipButton" value=">>|" />
+    </div> 
+    <div class="speechRecGroup" id="results">
+      <!-- <input id="speechInputDisplay" /> -->
+      <span id="final_span" class="final"></span>
+      <span id="interim_span" class="interim"></span>
+      <p></p>
+    </div> 
+    <div class="buttonGroup" id="speechButton">
+      <input type="button" id="listenButton" value="Click to speak" />
+      <input type="button" id="recordButton" value="Save to list" />
+    </div>
+    <div id="list">      
+      <span id="actionItems" display="none">
+      </span>
+    </div>
+    <div class="buttonGroup" id="actionItemButtons">
+      <input type="button" id="emailButton" value="Email" />
+      <input type="button" id="saveButton" value="Save to sheet" />
+    </div>
+  </div>
+
+
+  <script src="popup.js"></script>	
+	
+</body>
+</html>

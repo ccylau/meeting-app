@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            #optionWrapper {
+                display: inline-block;
+                vertical-align: middle;
+            }
+            input[type=number]{
+                width: 40px;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- change the amount of time added by add time button -->
+        <div class="optionWrapper">
+            <span>Add </span>
+            <input type="number" id="minutesToAdd" value=""/>
+            <span> minutes</span>
+        </div>
+        <!-- voice control for agenda items (and more?? Like the timer controls?!) -->
+        <div class="optionWrapper">
+            <span>For action items: use voice control only?</span>
+            <!-- Rounded switch -->
+            <label class="switch">
+                <input type="checkbox" id="voiceToggle">
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div class="optionWrapper">
+            <span>Automatically move on when time is up?</span>
+            <!-- Rounded switch -->
+            <label class="switch">
+                <input type="checkbox" id="timerMode">
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div class="optionWrapper">
+            <span>Start Phrase: </span>
+            <input type="text" id="startPhrase" />
+        </div>
+        <div class="optionWrapper">
+            <span>Stop Phrase: </span>
+            <input type="text" id="endPhrase" />
+        </div>
+        <a href="https://docs.google.com/spreadsheets/d/1O8OCZKm_pbiOtzqIoMKYk-t8TeY0hfXdModUkbqiMME/edit#gid=0">Test agenda</a>
+        <script src="options.js"></script>
+        <script src="permission.js"></script>
+        </body>
+</html>

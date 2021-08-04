@@ -1,0 +1,33 @@
+{
+	"name": "Meeting App",
+	"version": "0.1",
+	"description": "Meeting/Conferencing Tool",
+	"permissions": [
+		"identity",
+		"https://docs.google.com/spreadsheets",
+		"storage"
+	],
+	"background": {
+		"scripts": ["background.js"],
+		"persistent": false
+	},
+	"content_scripts": [
+		{
+			"matches": ["https://docs.google.com/spreadsheets/d/*"],
+			"js": ["contentScript.js"]
+		}
+	],
+	"browser_action": {
+		"default_popup": "popup.html"
+	},
+	"options_page": "options.html",
+	"oauth2": {		
+		"client_id":<your client credentials>,
+		"scopes": [
+			"https://www.googleapis.com/auth/spreadsheets",
+			"https://www.googleapis.com/auth/spreadsheets.readonly"
+		]
+	},
+	"content_security_policy": "script-src 'self' https://apis.google.com; object-src 'self'",
+	"manifest_version": 2
+}

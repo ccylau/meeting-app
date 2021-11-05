@@ -247,6 +247,12 @@ function sendSchedule(scheduleArray) {
     });
 }
 
+// retrieve title of spreadsheet
+function getTitle(token) {
+    //https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/developerMetadata/{metadataId}
+    //https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}/properties/title
+}
+
 // check for microphone permission
 // function checkAudioPermission() {
 //     chrome.tabs.executeScript({

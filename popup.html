@@ -5,7 +5,7 @@
 <head>
   <style>
     body {
-      min-width:200px;
+      min-width:300px;
     }
     table {
       border-collapse: collapse;
@@ -17,7 +17,6 @@
       /* position: relative; */
       border: hidden;
       width: 200px;
-      text-align: center;
       background: none;
     }
     .progress {
@@ -44,7 +43,18 @@
       margin: 5px;
     }
     #list {
-      margin: 20px;
+      margin: 15px;
+    }
+    #actionItems {
+      display: none;
+    }
+    h3 {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+    h4 {
+      margin-top: 5px;
+      margin-bottom: 5px;
     }
   </style>
 </head>
@@ -57,50 +67,72 @@
 		<input type="text" id="textInput" name="textInput" size=20>
 		<input type="button" id="button" value="Read this">
   </form>-->
-  <div id="homePage">
+  <div style="text-align: center;" id="homePage">
     <!-- this is when there's no valid agenda on spreadsheet -->
     <p>Would you like to create a new meeting agenda?</p>
-    <input type="button" id="createAgendaButton" value="Create Meeting Agenda" />
+    <div style="margin: auto;" id="centerButtonDiv">
+      <input type="button" id="createAgendaButton" value="Create Meeting Agenda" />
+    </div>
   </div>
   <div id="onAgendaSpreadsheetStuff">
-    <table width="100%", id="timeTable">
-      <col style="width:120px">
-      <col style="width:75px">
-      <thead>
-      <tr>
-        <th style="width:200px">Topic</th>
-        <th style="width:80px">Minutes</th>
-      </tr>
-      </thead>
-      <tbody id="tbody" class="table-body">
-      </tbody>
-    </table>
-  
-    <!-- <input type="button" id="clockButton" value="Start Clock" />
-    <input type="button" id="addButton" value="+ 10s" /> -->
-    <div class="buttonGroup" id="timer">
-      <input type="button" id="clockButton" value="Start clock" />
-      <input type="button" id="addButton" value="+" />
-      <input type="button" id="skipButton" value=">>|" />
-    </div> 
-    <div class="speechRecGroup" id="results">
-      <!-- <input id="speechInputDisplay" /> -->
-      <span id="final_span" class="final"></span>
-      <span id="interim_span" class="interim"></span>
-      <p></p>
-    </div> 
-    <div class="buttonGroup" id="speechButton">
-      <input type="button" id="listenButton" value="Click to speak" />
-      <input type="button" id="recordButton" value="Save to list" />
+    <div style="margin: 15px; padding: 5px; border-bottom: 1px solid black; " id="timeKeepingSection">
+      <table width="100%", id="timeTable">
+        <col style="width:120px">
+        <col style="width:75px">
+        <thead>
+        <tr>
+          <th style="width:200px; text-align:left">Topic</th>
+          <th style="width:80px; text-align:right">Minutes</th>
+        </tr>
+        </thead>
+        <tbody id="tbody" class="table-body">
+        </tbody>
+      </table>
+      <table width="100%">
+        <col style="width:120px">
+        <col style="width:75px">
+        <thead>
+        <tr>
+          <th style="width:200px; text-align:left;">Time Remaining</th>
+          <th style="width:80px; text-align:right;" id="timeRemaining"></th>
+        </tr>
+        </thead>
+      </table>
+    
+      <!-- <input type="button" id="clockButton" value="Start Clock" />
+      <input type="button" id="addButton" value="+ 10s" /> -->
+      <div class="buttonGroup" id="timer">
+        <input type="button" id="clockButton" value="Start clock" />
+        <input type="button" id="addButton" value="+" />
+        <input type="button" id="skipButton" value=">>|" />
+      </div> 
     </div>
-    <div id="list">      
-      <span id="actionItems" display="none">
-      </span>
+    <div style="margin: 15px; padding-top: 5px; padding-bottom: 20px; border-bottom: 1px solid black;" id="voiceControlSection">
+      <div class="speechRecGroup" style="display: inline-block; vertical-align: top; width: 55%;" id="results">
+        <!-- <input id="speechInputDisplay" /> -->
+        <span style="vertical-align: top; " id="final_span" class="final"></span>
+        <span style="vertical-align: top; " id="interim_span" class="interim"></span>
+        <p></p>
+      </div> 
+      <div class="buttonGroup" style="display: inline-block; vertical-align: top;" id="speechButton">
+        <input type="button" style="display: block;" id="listenButton" value="Click to speak" />
+        <input type="button" style="display: block;" id="recordButton" value="Save action item" />
+      </div>
     </div>
-    <div class="buttonGroup" id="actionItemButtons">
-      <input type="button" id="emailButton" value="Email" />
-      <input type="button" id="saveButton" value="Save to sheet" />
-    </div>
+    <div id="actionItemSection">
+      <div id="list">      
+        <span id="actionItemButtons">
+          <h3 style="display: inline-block;">Action Items</h3>
+          <!-- <div class="buttonGroup" id="actionItemButtons"> -->
+            <input type="button" id="emailButton" value="Email" />
+            <input type="button" id="saveButton" value="Save to sheet" />
+          <!-- </div> -->
+        </span>
+        <span id="actionItems">
+        </span>
+      </div>
+      
+    </div>    
   </div>
 
 

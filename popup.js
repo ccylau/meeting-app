@@ -13,7 +13,7 @@ var popupTable = document.getElementById("tbody");
 var timeOut;
 var startTime;
 var currentRow = 1; // start on first row, updates within discussionLoop
-var timeElapsed = 0;
+var countdown;
 var timer;
 var progressBar;
 
@@ -24,6 +24,7 @@ var startClockButton = document.getElementById("clockButton");
 var addTimeButton = document.getElementById("addButton");
 var skipTopicButton = document.getElementById("skipButton");
 var createAgendaButton = document.getElementById("createAgendaButton");
+var timeRemainingDisplay = document.getElementById("timeRemaining");
 // status flags
 var clockRunning = false;
 var timerFinished = true;
@@ -126,6 +127,7 @@ class Timer {
         // loop through timetable
         for (; row < timeTable.length; row++) {
           console.log("Row: " + row);
+          currentRow = row;
           if (!timerOn) {
             startClockButton.value = "Pause timer";
             // welcome message on first start
@@ -158,7 +160,7 @@ class Timer {
             progressBar.setWidth(100);
             progressBar = undefined;
             timeElapsed = 0;
-            timerOn = false;      
+            timerOn = false;   
           }  
         }
         clockRunning = false;
@@ -184,6 +186,7 @@ class Timer {
 
               // if starting from beginning of topic
               if (timeElapsed == 0) {
+                currentRow = row;
                 sayThis("Topic is " + timeTable[row][0]);
                 timeRemaining = timeTable[row][1] * 60000;
                 progressBar = new ProgressBar(timeTable[row][1] * 60, "bar" + row);
@@ -354,16 +357,21 @@ startClockButton.addEventListener("click", function (event) {
       // loop through timetable
       timer = new Timer(currentRow);
       timer.start();
+      // countdown clock
+      countdown.start();
     } else { // timer was paused
       console.log("Resuming from pause");
       // timer.resume();
       timer.start();
+      // reset countdown amount?
+      countdown.start();
     } 
     // tone for end of topic?    
 
   } else if (timeOut) { // PAUSE, or when timeTable is populated but clock is already running
     // pauseTimer();
     timer.pause();
+    countdown.pause();
     // startClockButton.value = 'Resume timer';
     // startClockButton.textContent = 'Timer paused';
     console.log("Timer paused");
@@ -428,17 +436,20 @@ function highlightRow(row, color) {
 }
 
 // variables for progressBar
-var timerStarted = false;
-var paused = false;
+var timerStarted = false; //not used meaningfully
+var paused = false; // not being used??
 
 class ProgressBar {
   constructor(seconds, barNum) {
-    var i = 0;
+    var startingNewBar = true;
     var elem = document.getElementById(barNum);
     var width = 0;
     var id;// = setInterval(increment, 500);
     var timeElapsed = 0;
     var totalTime = seconds;
+    var green = "#a9dfbf";
+    var yellow = "#f9e79f";
+    var red = "#d98880";
 
     /**
      * Timer modes: automatic move on vs manual progression
@@ -455,28 +466,30 @@ class ProgressBar {
     }
 
     this.start = function() {
-      id = setInterval(increment, 500);
+      id = setInterval(increment, 1000);
     }
 
     this.pause = function() {
       clearInterval(id);
       if (width >= redThreshold) {
-        elem.style.backgroundColor = "#d98880";
+        elem.style.backgroundColor = red;
       }
       else if (width >= yellowThreshold) {
-        elem.style.backgroundColor = "#f9e79f";
+        elem.style.backgroundColor = yellow;
       } else {
-        elem.style.backgroundColor = "#a9dfbf";
+        elem.style.backgroundColor = green;
       }
     }
 
     this.resume = function() {
-      if (i == 0) {
+      if (startingNewBar) {
         // width = 0;
-        i = 1;
-        id = setInterval(increment, 500);
-      } else if (width < 100) {
-        id = setInterval(increment, 500);
+        startingNewBar = false;
+        // id = setInterval(increment, 1000);
+      }
+      if (width < 100) {
+        // console.log("width (after pause): " + width);
+        id = setInterval(increment, 1000);
       }
     }
 
@@ -491,38 +504,92 @@ class ProgressBar {
     this.reset = function() {
       clearInterval(id);
       elem.style.backgroundColor = "white";
-      i = 0;
+      startingNewBar = true;
       timerStarted = false; // global var
     }
 
     function increment() {
+      // console.log("width: " + width);
       if (width >= 100) {
-        console.log("Progress bar completed.");
-        if (timerModeOn) {
+        // console.log("width: " + width);
+        // console.log("time elapsed: " + timeElapsed);
+        // console.log("total time: " + totalTime);
+        // console.log("Progress bar completed.");
+        if (timerModeOn) { // auto advance mode
           clearInterval(id);
           elem.style.backgroundColor = "white";
-          i = 0;
+          startingNewBar = true;
           timerStarted = false; // global var
         } else{
+          // console.log("width (>=): " + width);
           width = 100;
-          elem.style.backgroundColor = "#cd6155";
+          // console.log("width: " + width);
+          elem.style.width = width + "%";
+          elem.style.backgroundColor = "#cd6155"; // red
         }        
       } else {
-        timeElapsed = timeElapsed + .5;
-        width = (timeElapsed/totalTime) * 100;
+        timeElapsed = timeElapsed + 1;
+        // console.log("time elapsed: " + timeElapsed);
+        // console.log("total time: " + totalTime);
+        width = Math.round((timeElapsed/totalTime) * 100);
+        // console.log("width: " + width);
         elem.style.width = width + "%";
         // elem.innerHTML = width + "%";
         if (width >= redThreshold) {
-          elem.style.backgroundColor = "#cd6155";
+          elem.style.backgroundColor = red;
         }
         else if (width >= yellowThreshold) {
-          elem.style.backgroundColor = "#f7dc6f";
+          elem.style.backgroundColor = yellow;
         } else {
-          elem.style.backgroundColor = "#7dcea0";
+          elem.style.backgroundColor = green;
         }
       };
     }
   };
+}
+
+class CountdownClock {
+  constructor(totalTime) {
+    var time = new Date(totalTime);
+    // console.log("remaining time: " + totalTime);
+    time.setHours(0);
+    var timeInterval;
+    var elapsedTime = 0;
+    var timeTick = 0;
+
+    this.start = function() {
+      var startTime = new Date();
+      // console.log("startTime: " + startTime);
+      timeInterval = setInterval(function() {
+        timeTick = Date.parse(new Date()) - Date.parse(startTime);
+        // console.log("elapsedTime: " + elapsedTime);
+        var remainingTime = totalTime - timeTick - elapsedTime;
+        // console.log("remainingTime = " + remainingTime);
+        // console.log("this is the old time: " + time);
+        if (remainingTime < 0) {
+          time.setTime(remainingTime * -1);
+          time.setHours(0);
+          timeRemainingDisplay.innerHTML = "-" + time.toTimeString().substring(0, 8);
+        } else {
+          time.setTime(remainingTime);
+          time.setHours(0);
+          timeRemainingDisplay.innerHTML = time.toTimeString().substring(0, 8);
+        }    
+        // console.log("this is the new time: " + time);
+        
+      }, 1000);
+    }
+
+    this.pause = function() {
+      console.log("pausing countdown");
+      elapsedTime += timeTick;
+      clearInterval(timeInterval);
+    }
+
+    this.display = function() {
+      timeRemainingDisplay.innerHTML = time.toTimeString().substring(0, 8);
+    }
+  }
 }
 
 /*
@@ -534,8 +601,6 @@ var keywords = ["add action item"];
  
 // listener for saving action items
 recordActionItemButton.addEventListener("click", function (event) {
-  // make action item list visible
-  actionItemList.style.display = "inline";
   // take the action item from final_transcript
   // add to list!
   addActionItem(final_transcript);
@@ -578,15 +643,20 @@ recognition.onresult = function (event) {
     // let endPhrase = "save item";
 
     // listen for action item command	
-    let newlyAdded = final_span.innerHTML.substring(currentIndex).toLowerCase();
-    if (newlyAdded.includes(endPhrase)) {
+    // console.log("final transcript: " + final_transcript);
+    // console.log("interim transcript: " + interim_transcript);
+    // let newlyAddedToTranscript = final_span.innerHTML.substring(currentIndex).toLowerCase();
+    let newlyAddedToTranscript = final_transcript.substring(currentIndex).toLowerCase();
+    console.log("newlyAdded: " + newlyAddedToTranscript);
+    if (newlyAddedToTranscript.includes(endPhrase)) {
       console.log("End phrase heard!")
-      let startIndex = newlyAdded.lastIndexOf(startPhrase) + startPhrase.length;
-      console.log("StartIndex = " + startIndex);
-      let endIndex = newlyAdded.lastIndexOf(endPhrase);
-      console.log(newlyAdded.substring(startIndex, endIndex));
-      addActionItem(newlyAdded.substring(startIndex, endIndex));
-      currentIndex = final_span.innerHTML.length;
+      let startIndex = newlyAddedToTranscript.lastIndexOf(startPhrase) + startPhrase.length;
+      // console.log("StartIndex = " + startIndex);
+      let endIndex = newlyAddedToTranscript.lastIndexOf(endPhrase);
+      let newActionItem = newlyAddedToTranscript.substring(startIndex, endIndex);
+      addActionItem(newActionItem);
+      currentIndex = final_transcript.length; // to start next scan after the latest end phrase
+      // console.log("currentIndex: " + currentIndex);
       // action_span.innerHTML += '<br>';
     }
   }
@@ -629,7 +699,7 @@ speechRecognitionButton.addEventListener("click", function (event) {
     speechRecognitionButton.value = 'Click to speak';
     return;
   }
-  final_transcript = '';
+  final_transcript = "";
   recognition.lang = "en-US";
   recognition.start();
   speechRecognitionButton.value = 'Stop recording';
@@ -653,11 +723,26 @@ emailButton.addEventListener('click', function (event) {
 });
 
 function sendEmail(emails) {
+  // finalize the action item array
+  if (tempItemArray.length != 0) {
+    actionItemArray.push(tempItemArray);
+    tempItemArray = [];
+  }  
+  // for testing
+  // actionItemArray = [[], ["topic 1", "topic 1.5"], ["another one"], ["topic 3", "topic 4"]]; 
   var subject = "Meeting Notes";
   var body = "Action Items\n\n";
   // copy action items from array
-  for (var i = 0; i < actionItemArray.length; i++) {
-    body += actionItemArray[i] + "\n";
+  for (var i = 1; i < actionItemArray.length; i++) {
+    // body += actionItemArray[i] + "\n";
+    body += timeTable[i][0] + "\: ";
+    for (var j = 0; j < actionItemArray[i].length; j++) {
+      body += actionItemArray[i][j];
+      if (j + 1 != actionItemArray[i].length) {
+        body += ", ";
+      }
+    }
+    body += "\n";
   }
   var emailList = emails.join(',');
   var emailUrl = 'mailto:' + emailList + '?subject=' + subject + '&body=' + encodeURIComponent(body);
@@ -667,31 +752,74 @@ function sendEmail(emails) {
 // saves list of action items to google sheet
 saveButton.addEventListener('click', function(event) {
   console.log("save button clicked");  
+  // finalize the action item array
+  if (tempItemArray.length != 0) {
+    actionItemArray.push(tempItemArray);
+    tempItemArray = [];
+  }  
+  // for testing
+  // actionItemArray = [[], ["topic 1", "topic 1.5"], ["another one"], ["topic 3", "topic 4"]]; 
   // format must be an array of arrays [[], [], []] to match the rows and columns of spreadsheet
-  var formattedActionItemList = [];
-  for (var a of actionItemArray) {
-    formattedActionItemList.push([a]);
+  // var formattedActionItemList = [];
+  // for (var a of actionItemArray) {
+  //   formattedActionItemList.push([a]);
+  // }
+  // var formattedActionItemArray = actionItemArray.splice(1);
+  var formattedActionItemArray = []
+  for (var i = 1; i < actionItemArray.length; i++) {
+    formattedActionItemArray[i - 1] = [actionItemArray[i].join(", ")];
   }
+  console.log("formatted array: " + formattedActionItemArray);
   // message action item list to background
-  chrome.runtime.sendMessage({greeting: "actionItemsFromPopup", actionItems: formattedActionItemList}, function (response) {
-    console.log('sent ' + formattedActionItemList);
+  chrome.runtime.sendMessage({greeting: "actionItemsFromPopup", actionItems: formattedActionItemArray}, function (response) {
+    console.log('sent ' + formattedActionItemArray);
     return true;
   })
 })
 
+var currentTopic = 0;
+var tempItemArray = [];
 /**
  * Adds action item newItem to list.
  * 
  * @param {string} newItem 
  */
 function addActionItem(newItem) {
+  // make action item list visible
+  actionItemList.style.display = "inline";
   if (newItem.length > 0) {
-    let itemList = actionItemList.innerHTML.trim();
-    if (itemList == "" || itemList == null) {
-      actionItemList.innerHTML += '<h3>Action Items</h3>';
-    }
+    // console.log("To add to list: " + newItem);
+    // let itemList = actionItemList.innerHTML.trim();    
+    // // if (itemList == "" || itemList == null) {
+    // //   actionItemList.innerHTML += '<h3>Action Items</h3>';
+    // // }
+    // console.log("current row: " + currentRow);
+    // console.log("current topic: " + currentTopic);
+    if (currentRow != currentTopic) {
+      // only add topic if saving action item
+      actionItemList.innerHTML += '<h4>' + timeTable[currentRow][0] + '</h4>';
+      // bug: prevent incrementing topic when no timer is set/running
+      // but results in multiple headers if saving before timer started
+      
+      // put empty array if no action item saved for a topic
+      while (currentRow != currentTopic) {
+        // console.log("current row: "+ currentRow);
+        // console.log("current topic (list): " + currentTopic);
+        currentTopic++;
+      }
+      // currentTopic = currentRow;
+      actionItemArray.push(tempItemArray);
+      for (var i = 0; i < actionItemArray.length; i++) {
+        console.log("action item array[" + i + "]: " + actionItemArray[i]);
+      }
+      // reset array for new row?
+      tempItemArray = [];
+    }    
+    // display on popup.html
     actionItemList.innerHTML += '<li>' + newItem + '</li>';
-    actionItemArray.push(newItem);
+    // actionItemArray.push(newItem);
+    tempItemArray.push(newItem);
+    console.log("temp array: " + tempItemArray);
   }
 }
 
@@ -755,6 +883,7 @@ function populateTable(schedule) {
     popupHomePage.style.display = "inline";
     return;
   } else {
+    var totalTime = 0;
     for (var i = 1; i < schedule.length; i++) {
       // create a new row
       var newRow = popupTable.insertRow(popupTable.length);
@@ -772,10 +901,16 @@ function populateTable(schedule) {
           var firstCell = "<div class=\"progress\" id=\"bar" + i + "\"></div>" + schedule[i][j];
           cell.innerHTML = firstCell;
         } else {
+          cell.setAttribute("style", "text-align:right");
           cell.innerHTML = schedule[i][j];
+          totalTime += parseFloat(schedule[i][j]);
         }
       }
     }
+    // create countdown here, start it in on start button
+    countdown = new CountdownClock(totalTime*60*1000);
+    countdown.display();
+
     if (voiceControlOn) {
       var saveToListButton = document.getElementById("recordButton");
       saveToListButton.style.display = "none";

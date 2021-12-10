@@ -202,7 +202,7 @@ class Timer {
 
               startTime = new Date();
               await delay(timeRemaining);
-              // sayThis("End of discussion.");
+              sayThis("End of discussion.");
               progressBar.setWidth(100);
             } else {
               // reset after finishing loop through timetable
@@ -358,6 +358,7 @@ startClockButton.addEventListener("click", function (event) {
       timer = new Timer(currentRow);
       timer.start();
       // countdown clock
+      countdown.clear();
       countdown.start();
     } else { // timer was paused
       console.log("Resuming from pause");
@@ -589,6 +590,14 @@ class CountdownClock {
     this.display = function() {
       timeRemainingDisplay.innerHTML = time.toTimeString().substring(0, 8);
     }
+
+    this.clear = function() {
+      console.log("clearing countdown");
+      time = new Date(totalTime*60*1000);
+      time.setHours(0);
+      elapsedTime = 0;
+      timeTick = 0;
+    }
   }
 }
 
@@ -667,6 +676,13 @@ recognition.onresult = function (event) {
   // display transcript texts
   final_span.innerHTML = linebreak(final_transcript);
   interim_span.innerHTML = linebreak(interim_transcript);
+
+  if (voiceControlOn) {
+    // for div scroll to go to bottom
+    var transcriptBox = document.getElementById("results");
+    transcriptBox.scrollTop = transcriptBox.scrollHeight;
+    // transcriptBox.scrollIntoView(false);
+  }
 
   // if (final_transcript || interim_transcript) {
   //   showButtons('inline-block');
@@ -777,7 +793,7 @@ saveButton.addEventListener('click', function(event) {
   })
 })
 
-var currentTopic = 0;
+var currentTopicOnList = 0;
 var tempItemArray = [];
 /**
  * Adds action item newItem to list.
@@ -795,17 +811,22 @@ function addActionItem(newItem) {
     // // }
     // console.log("current row: " + currentRow);
     // console.log("current topic: " + currentTopic);
-    if (currentRow != currentTopic) {
+    if (currentRow != currentTopicOnList) {
       // only add topic if saving action item
       actionItemList.innerHTML += '<h4>' + timeTable[currentRow][0] + '</h4>';
       // bug: prevent incrementing topic when no timer is set/running
       // but results in multiple headers if saving before timer started
       
       // put empty array if no action item saved for a topic
-      while (currentRow != currentTopic) {
+      while (currentRow != currentTopicOnList) {
+        // quick fix to account for no items in a topic
+        if (currentRow - currentTopicOnList > 1) {
+          actionItemArray.push(tempItemArray);
+          tempItemArray = [];
+        }
         // console.log("current row: "+ currentRow);
         // console.log("current topic (list): " + currentTopic);
-        currentTopic++;
+        currentTopicOnList++;
       }
       // currentTopic = currentRow;
       actionItemArray.push(tempItemArray);
